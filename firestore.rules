@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.displayName is string && data.displayName.size() <= 100
+          && data.email is string && data.email.size() <= 150
+          && data.totalStars is int && data.totalStars >= 0
+          && data.level is int && data.level >= 1
+          && (data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 500));
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); 
+      
+      allow create: if isOwner(userId) 
+        && isValidId(userId)
+        && isValidUser(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isOwner(userId)
+        && isValidUser(incoming())
+        && incoming().updatedAt == request.time
+        && incoming().createdAt == existing().createdAt
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'totalStars', 'level', 'updatedAt'])
+        );
+      
+      // --- Game Progress Subcollection ---
+      match /gameProgress/{progressId} {
+        function isValidProgress(data) {
+          return data.gameId is string && data.gameId.size() <= 100
+            && data.userId == userId
+            && data.bestScore is int && data.bestScore >= 0
+            && data.levelReached is int && data.levelReached >= 0
+            && (data.lastPlayed == null || data.lastPlayed == request.time);
+        }
+
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(progressId) && isValidProgress(incoming());
+        allow update: if isOwner(userId) && isValidProgress(incoming())
+          && (incoming().diff(existing()).affectedKeys().hasOnly(['bestScore', 'levelReached', 'lastPlayed']))
+          && incoming().userId == existing().userId
+          && incoming().gameId == existing().gameId;
+      }
+
+      // --- Achievements Subcollection ---
+      match /achievements/{id} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(id) && incoming().userId == userId;
+      }
+    }
+  }
+}

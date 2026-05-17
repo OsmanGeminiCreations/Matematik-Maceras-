@@ -1,0 +1,6 @@
+{
+  "name": "Matematik Macerası",
+  "description": "Çocuklar için eğlenceli ve etkileşimli matematik oyunları platformu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

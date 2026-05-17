@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile data including experience points and level.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "totalStars": { "type": "integer" },
+        "level": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["displayName", "email", "totalStars", "level"]
+    },
+    "GameProgress": {
+      "title": "Game Progress",
+      "description": "Progress tracking for individual games.",
+      "type": "object",
+      "properties": {
+        "gameId": { "type": "string" },
+        "userId": { "type": "string" },
+        "bestScore": { "type": "integer" },
+        "levelReached": { "type": "integer" },
+        "lastPlayed": { "type": "string", "format": "date-time" }
+      },
+      "required": ["gameId", "userId", "bestScore", "levelReached"]
+    },
+    "Achievement": {
+      "title": "Achievement",
+      "description": "Badges and achievements earned by the user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "achievementId": { "type": "string" },
+        "earnedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "achievementId", "earnedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles authenticated via Firebase Auth."
+    },
+    "/users/{userId}/gameProgress/{progressId}": {
+      "schema": "GameProgress",
+      "description": "Progress of a specific user for various games."
+    },
+    "/users/{userId}/achievements/{achievementId}": {
+      "schema": "Achievement",
+      "description": "Achievements earned by a specific user."
+    }
+  }
+}
