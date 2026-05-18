@@ -1,4 +1,4 @@
-.github/workflows/dep.yml
+.github/workflows/deploy.yml
 name: Deploy TypeScript Website
 
 on:
