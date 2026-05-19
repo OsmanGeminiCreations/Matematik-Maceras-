@@ -2,7 +2,7 @@ name: Deploy TypeScript to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Change to "master" if your default branch is master
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -32,13 +32,12 @@ jobs:
         run: npm install
 
       - name: Compile TypeScript
-        run: npx tsc # If using Vite/Next.js, change this line to: npm run build
+        run: npm run build
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          # Change "dist" to your compiler's output folder (like "build" or ".")
-          path: './dist' 
+          path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
